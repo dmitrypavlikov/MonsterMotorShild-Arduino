@@ -88,8 +88,8 @@ void set_vel(float linear, float angular){
     digitalWrite(DIR2A,LOW); digitalWrite(DIR2B,HIGH);
   }
   
-  analogWrite(PWM1, SPD_L);
-  analogWrite(PWM2, SPD_R);
+  analogWrite(PWM1, abs(SPD_L));
+  analogWrite(PWM2, abs(SPD_R));
 }
 
   void loop() {
