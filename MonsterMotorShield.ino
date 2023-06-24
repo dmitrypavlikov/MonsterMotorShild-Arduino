@@ -75,21 +75,17 @@ void set_vel(float linear, float angular){
   SPD_R = int(linear + angular * BASE_WIDTH / 2.0);
 
   if(SPD_L > 0){
-    digitalWrite(DIR1A,HIGH);
-    digitalWrite(DIR1B,LOW);
+    digitalWrite(DIR1A,HIGH); digitalWrite(DIR1B,LOW);
   }
   if(SPD_L < 0){
-    digitalWrite(DIR1A,LOW);
-    digitalWrite(DIR1B,HIGH);
+    digitalWrite(DIR1A,LOW); digitalWrite(DIR1B,HIGH);
   }
 
   if(SPD_R > 0){
-    digitalWrite(DIR2A,HIGH);
-    digitalWrite(DIR2B,LOW);
+    digitalWrite(DIR2A,HIGH); digitalWrite(DIR2B,LOW);
   }
   if(SPD_R < 0){
-    digitalWrite(DIR2A,LOW);
-    digitalWrite(DIR2B,HIGH);
+    digitalWrite(DIR2A,LOW); digitalWrite(DIR2B,HIGH);
   }
   
   analogWrite(PWM1, SPD_L);
