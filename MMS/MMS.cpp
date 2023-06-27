@@ -30,20 +30,41 @@
 #define MAX_VEL 3.5
 
 
-class MMS {
+class MMS 
+{
   public:
   int CURRENT_L = 0;
   int CURRENT_R = 0;
 
-  private:
-  uint8_t SPD_L = 0;
-  uint8_t SPD_R = 0;
+  // All pinMode in one function
+  void start(){
+    // Left motor
+    pinMode(PWM1,OUTPUT);
+    pinMode(DIR1A,OUTPUT);
+    pinMode(DIR2A,OUTPUT);
+    pinMode(DIAG1,INPUT);    // ATTENTION: Torque pin in Diagnostic workmode
+    pinMode(CUR1,INPUT);
   
-  float PID = 0;
-  float P = 0;
-  float I = 0;
-  float D = 0;
+    // Right motor
+    pinMode(PWM2,OUTPUT);
+    pinMode(DIR1B,OUTPUT);
+    pinMode(DIR2B,OUTPUT);
+    pinMode(DIAG2,INPUT);   // ATTENTION: Torque pin in Diagnostic workmode
+    pinMode(CUR2,INPUT);
+ 
+    /*Encoders*/
+    /*pinMode(EN1A, INPUT_PULLUP);
+    pinMode(EN1B, INPUT_PULLUP);
+    pinMode(EN2A, INPUT_PULLUP);
+    pinMode(EN2B, INPUT_PULLUP);*/
 
+    }
+  
+  void clear(){
+    SPD_L = 0;
+    SPD_R = 0;
+  }
+  
   // Make wheels free for spinning by hands, zero speed
   void torque_disable(){
     analogWrite(PWM1, 0);  
@@ -51,38 +72,61 @@ class MMS {
     digitalWrite(DIR1A,LOW); digitalWrite(DIR2A,LOW);
     digitalWrite(DIR1B,LOW); digitalWrite(DIR2B,LOW);
   }
-
+  
   // Emergency STOP of motors by torque disable and zero spd
   // void brake_motors(){;}
-
+ 
   // Set speed of motors by linear and angular velocity
   void set_spd(float linear, float angular){
+    clear();
     
-    // Torque enable
-    digitalWrite(TRQ1,HIGH);    
-    digitalWrite(TRQ2,HIGH);
-
     // Calculate velocity to speed of each wheel
-    SPD_L = int(linear - angular * BASE_WIDTH / 2.0);
-    SPD_R = int(linear + angular * BASE_WIDTH / 2.0);
+    SPD_L = round(linear - angular * BASE_WIDTH / 2.0) * 75;
+    SPD_R = round(linear + angular * BASE_WIDTH / 2.0) * 75;
 
     // Set the spinning direction of each wheel
-    if(SPD_L > 0){
-      digitalWrite(DIR1A,HIGH); digitalWrite(DIR1B,LOW);
+    if(linear - angular * BASE_WIDTH / 2.0 > 0.0) {
+      digitalWrite(DIR1A,HIGH); digitalWrite(DIR2A,LOW);
     }
-    if(SPD_L < 0){
-     digitalWrite(DIR1A,LOW); digitalWrite(DIR1B,HIGH);
-   }
-    if(SPD_R > 0){
-     digitalWrite(DIR2A,HIGH); digitalWrite(DIR2B,LOW);
+    if(linear - angular * BASE_WIDTH / 2.0 < 0.0) {
+     digitalWrite(DIR1A,LOW); digitalWrite(DIR2A,HIGH);
     }
-    if(SPD_R < 0){
-      digitalWrite(DIR2A,LOW); digitalWrite(DIR2B,HIGH);
+    if(linear + angular * BASE_WIDTH / 2.0 > 0.0) {
+     digitalWrite(DIR1B,HIGH); digitalWrite(DIR2B,LOW);
     }
-  
+    if(linear + angular * BASE_WIDTH / 2.0 < 0.0) {
+      digitalWrite(DIR1B,LOW); digitalWrite(DIR2B,HIGH);
+    }
+
+    
+
+    Serial.print(linear - angular * BASE_WIDTH / 2.0);
+    Serial.print("  ");
+    Serial.print(linear + angular * BASE_WIDTH / 2.0);
+    Serial.print(" | ");
+    Serial.print(SPD_L);
+    Serial.print("  ");
+    Serial.println(SPD_R);
+
     analogWrite(PWM1, abs(SPD_L));  
     analogWrite(PWM2, abs(SPD_R));
     }
+
+  private:
+  int16_t SPD_L = 0;
+  int16_t SPD_R = 0;
+  
+  float PID = 0;
+  float P = 0;
+  float I = 0;
+  float D = 0;
+
+  
+
+  
+
+
+  
 
   
 };
