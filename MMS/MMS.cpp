@@ -1,5 +1,14 @@
-/*      MPNSTER MOTOR SHIELD        */
+/*------BASE_CONTROL-----*/
+
 #include "Arduino.h"
+
+// PinChangeInterrupt Lib for Arduino: 
+// https://github.com/NicoHood/PinChangeInterrupt
+#include <PinChangeInterrupt.h>
+#include <PinChangeInterruptBoards.h>
+#include <PinChangeInterruptPins.h>
+#include <PinChangeInterruptSettings.h>
+
 
 // Left motor
 #define DIR1A   2   // Direction CW
@@ -8,21 +17,22 @@
 #define TRQ1    A0  // #IF PINMODE=OUTPUT# Torque (HIGH=Enable)
 #define DIAG1   A0  // #IF PINMODE=INPUT#  Diagnostic (HIGH=NO_PROBLEM)
 #define CUR1    A2  // Present Current (0-1023) (0-65 mA)
+//Left encoder
+#define EN1A  10   // Trigger of Interrupt
+#define EN2A  11   // 
+#define TIX_PER_SPIN_L 496
 
 // Right motor
 #define DIR1B   5   // Direction CW 1B
 #define DIR2B   6   // Direction CWW 
 #define PWM2    7   // Speed (0-255)
 #define TRQ2    A1  // #IF PINMODE=OUTPUT# Torque (HIGH=Enable)
-#define DIAG2    A1  // ##IF PINMODE=INPUT#  Diagnostic (HIGH=NO_PROBLEM)
+#define DIAG2   A1  // ##IF PINMODE=INPUT#  Diagnostic (HIGH=NO_PROBLEM)
 #define CUR2    A3  // Present Current (0-1023) (0-65 mA)
-
-// Encoder settings
-/*#define EN1A    //TODO
-#define EN1B    //TODO
-#define EN2A    //TODO
-#define EN2B    //TODO
-#define */
+// Right encoder 
+#define EN1B  13  // 
+#define EN2B  12  // Trigger of Interrupt
+#define TIX_PER_SPIN_L 696
 
 // Robot settings
 #define BASE_WIDTH 0.315
@@ -30,11 +40,15 @@
 #define MAX_VEL 3.5
 
 
+
+
 class MMS 
 {
   public:
   int CURRENT_L = 0;
   int CURRENT_R = 0;
+  bool DIAG_L = true;
+  bool DIAG_B = true;
 
   // All pinMode in one function
   void start(){
@@ -44,19 +58,27 @@ class MMS
     pinMode(DIR2A,OUTPUT);
     pinMode(DIAG1,INPUT);    // ATTENTION: Torque pin in Diagnostic workmode
     pinMode(CUR1,INPUT);
-  
+    // Left encoder
+    pinMode(EN1A, INPUT_PULLUP);
+    pinMode(EN2A, INPUT_PULLUP);
+
     // Right motor
     pinMode(PWM2,OUTPUT);
     pinMode(DIR1B,OUTPUT);
     pinMode(DIR2B,OUTPUT);
     pinMode(DIAG2,INPUT);   // ATTENTION: Torque pin in Diagnostic workmode
     pinMode(CUR2,INPUT);
- 
-    /*Encoders*/
-    /*pinMode(EN1A, INPUT_PULLUP);
+    // Right encoder
     pinMode(EN1B, INPUT_PULLUP);
-    pinMode(EN2A, INPUT_PULLUP);
-    pinMode(EN2B, INPUT_PULLUP);*/
+    pinMode(EN2B, INPUT_PULLUP);
+
+    //GPIO Pins for power supply of right encoder
+    pinMode(8, OUTPUT);
+    pinMode(9, OUTPUT);
+    digitalWrite(8, HIGH);
+    digitalWrite(9, LOW);
+
+    
 
     }
   
@@ -64,7 +86,7 @@ class MMS
     SPD_L = 0;
     SPD_R = 0;
   }
-  
+
   // Make wheels free for spinning by hands, zero speed
   void torque_disable(){
     analogWrite(PWM1, 0);  
@@ -81,8 +103,8 @@ class MMS
     clear();
     
     // Calculate velocity to speed of each wheel
-    SPD_L = round(linear - angular * BASE_WIDTH / 2.0) * 75;
-    SPD_R = round(linear + angular * BASE_WIDTH / 2.0) * 75;
+    SPD_L = round(linear - angular * BASE_WIDTH / 2.0);
+    SPD_R = round(linear + angular * BASE_WIDTH / 2.0);
 
     // Set the spinning direction of each wheel
     if(linear - angular * BASE_WIDTH / 2.0 > 0.0) {
@@ -112,6 +134,14 @@ class MMS
     analogWrite(PWM2, abs(SPD_R));
     }
 
+    // Getter for EN_L
+    // int get_EN_L(){return EN_L;}
+
+    // Getter for EN_R
+    // int get_EN_R(){return EN_R;}
+
+    // 
+
   private:
   int16_t SPD_L = 0;
   int16_t SPD_R = 0;
@@ -125,8 +155,8 @@ class MMS
 
   
 
-
-  
-
   
 };
+
+  
+
