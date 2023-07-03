@@ -32,12 +32,13 @@
 // Right encoder 
 #define EN1B  13  // 
 #define EN2B  12  // Trigger of Interrupt
-#define TIX_PER_SPIN_L 696
+#define TIX_PER_SPIN_R 696
 
 // Robot settings
 #define BASE_WIDTH 0.315
 #define MAX_CURRENT 10  //TODO or not use
 #define MAX_VEL 3.5
+#define WHEEL_DIAMETER 200 // мм/с
 
 
 
@@ -83,8 +84,7 @@ class MMS
     }
   
   void clear(){
-    SPD_L = 0;
-    SPD_R = 0;
+  // EMPTY
   }
 
   // Make wheels free for spinning by hands, zero speed
@@ -99,9 +99,13 @@ class MMS
   // void brake_motors(){;}
  
   // Set speed of motors by linear and angular velocity
-  void set_spd(float linear, float angular){
-    clear();
+  /*void set_vel(float linear, float angular){
+    SPD_L = 0;
+    SPD_R = 0;
     
+    
+
+
     // Calculate velocity to speed of each wheel
     SPD_L = round(linear - angular * BASE_WIDTH / 2.0);
     SPD_R = round(linear + angular * BASE_WIDTH / 2.0);
@@ -120,25 +124,33 @@ class MMS
       digitalWrite(DIR1B,LOW); digitalWrite(DIR2B,HIGH);
     }
 
-    
+    analogWrite(PWM1, abs(SPD_L));  
+    analogWrite(PWM2, abs(SPD_R));
+    }*/
 
-    Serial.print(linear - angular * BASE_WIDTH / 2.0);
-    Serial.print("  ");
-    Serial.print(linear + angular * BASE_WIDTH / 2.0);
-    Serial.print(" | ");
-    Serial.print(SPD_L);
-    Serial.print("  ");
-    Serial.println(SPD_R);
+    void set_pwm(float SPD_L, float SPD_R){
+      if(SPD_L > 0.0) {
+        digitalWrite(DIR1A,HIGH); digitalWrite(DIR2A,LOW);
+      }
+      if(SPD_L < 0.0) {
+        digitalWrite(DIR1A,LOW); digitalWrite(DIR2A,HIGH);
+      }
+      if(SPD_R > 0.0) {
+      digitalWrite(DIR1B,HIGH); digitalWrite(DIR2B,LOW);
+      }
+      if(SPD_R < 0.0) {
+        digitalWrite(DIR1B,LOW); digitalWrite(DIR2B,HIGH);
+      }
 
     analogWrite(PWM1, abs(SPD_L));  
     analogWrite(PWM2, abs(SPD_R));
+
+
+
+
     }
 
-    // Getter for EN_L
-    // int get_EN_L(){return EN_L;}
 
-    // Getter for EN_R
-    // int get_EN_R(){return EN_R;}
 
     // 
 
@@ -146,10 +158,7 @@ class MMS
   int16_t SPD_L = 0;
   int16_t SPD_R = 0;
   
-  float PID = 0;
-  float P = 0;
-  float I = 0;
-  float D = 0;
+  
 
   
 
