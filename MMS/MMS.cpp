@@ -123,7 +123,7 @@ class MMS
       digitalWrite(DIR1A,LOW); digitalWrite(DIR2A,HIGH);
     }
     if(SPD_R > 0.0) {
-    digitalWrite(DIR1B,HIGH); digitalWrite(DIR2B,LOW);
+      digitalWrite(DIR1B,HIGH); digitalWrite(DIR2B,LOW);
     }
     if(SPD_R < 0.0) {
       digitalWrite(DIR1B,LOW); digitalWrite(DIR2B,HIGH);
