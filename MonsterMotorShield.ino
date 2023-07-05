@@ -1,5 +1,17 @@
 #include "MMS/MMS.cpp"
 
+/***********SERIAL DEFINES***********/
+// IF cmd_vel not recived during 2 sec => vel = 0
+#define CMD_VEL_TIMEOUT 3000
+
+// Baudrate for serial communication
+#define SERIAL_BAUD 115200
+
+// Rate for serial timeout [ms]
+#define SERIAL_RATE 10 
+/*******END OF SERIAL DEFINES*******/
+
+
 MMS mms;
 
 // Encoder variables
@@ -14,6 +26,9 @@ float PRESENT_VEL_R = 0;
 float PAST_VEL_L = 0;
 float PAST_VEL_R = 0;
 
+// Linear vel and angular vel variables
+float lin = 0.0; // m/s
+float ang = 0.0; // m/s  (+ CWW | - CW)
 
 // Left motor PID variables
 float PID_L = 0;        // Error
@@ -30,13 +45,42 @@ float I_R = 60;         // I coefficient
 float D_R = 0;          // D coefficient
 
 
-// Пригодится на этапе ROS
-float lin = 0.25; // m/s
-float ang = 0; // m/s  (+ CWW | - CW)
-
-// Millis timer Не пригодится на этапе ROS
+// Millis timer
 unsigned long timer;
 
+
+
+void setup(){
+  delay(1000);
+  Serial.begin(SERIAL_BAUD);
+  Serial.setTimeout(SERIAL_RATE);
+  
+  
+  
+  
+  mms.start();
+  
+  // Interrupt for reading encoders
+  attachPCINT(digitalPinToPCINT(EN1A), readLeftEnc, RISING);
+  attachPCINT(digitalPinToPCINT(EN1B), readRightEnc, RISING);
+
+  // Initialize global timer
+  timer = millis();
+  }
+
+
+void loop() {
+        
+    calculate_vel(lin, ang, 0.05);
+    
+  // Check velocity timeout
+  if(millis() - timer >= CMD_VEL_TIMEOUT){
+    lin = 0.0;
+    ang = 0.0;
+    mms.motor_stop();
+  }
+    delay(50);
+}
 
 
 // Reading encoder PRESENT_EN_L
@@ -97,41 +141,34 @@ void calculate_vel(float lin, float ang, float freq){
   PAST_EN_R = PRESENT_EN_R;
 }
 
-void setup(){
-  mms.start();
-  Serial.begin(9600);
-  
-  // Interrupt for reading encoders
-  attachPCINT(digitalPinToPCINT(EN1A), readLeftEnc, RISING);
-  attachPCINT(digitalPinToPCINT(EN1B), readRightEnc, RISING);
+/**********SERIAL FUNCTIONS SPACE***********/
+// Reading and decoding cmd_vel from Serial port
+void serialEvent(){
+  if(Serial.available()){
+    // Buffer for reciving mail from Serial
+    char mail[12]={}; // [+x.xx,+x.xx/n] 12 chars
+    // Reading mail to buffer
+    Serial.readBytesUntil('\n', mail, 12);
 
-  // Миллис Скорее всего не пригодится в ROS
-  timer = millis();
-  }
+    // Local buffer for parts of mail
+    String num;
+    // Variable for splitting mail on 2 parts
+    bool split = true;
 
-  void loop() {
-    calculate_vel(lin, ang, 0.05);
-
-    // Отладка
-    Serial.print(PRESENT_VEL_L);
-    Serial.print("  ");
-    Serial.print(PRESENT_VEL_R);
-    Serial.print("  |  ");
-    Serial.print(int(PRESENT_EN_L));
-    Serial.print("  ");
-    Serial.print(int(PRESENT_EN_R));
-    Serial.print("  |  ");
-    Serial.print(PID_L);
-    Serial.print("  ");
-    Serial.println(PID_R);
-
-    if(millis() - timer >= 5000){
-      if(lin > 0){ lin+= 0.025;}
-      lin = -lin;
-      //I_PID_L = 0;
-      //I_PID_R = 0;
-      timer = millis();
+    // Mail splitting cycle
+    for(int i=0; i<sizeof(mail); i++){
+      if(mail[i] != ','){
+        num += mail[i];
+      }else{
+        // Read linear velocity
+        lin = num.toFloat();
+        num = "";
+        }
     }
-    
-    delay(50);
+    // Read angular velocity
+    ang = num.toFloat();
+    timer = millis();
+  }
 }
+
+//void send
