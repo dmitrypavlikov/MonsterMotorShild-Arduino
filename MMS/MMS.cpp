@@ -52,7 +52,9 @@ class MMS
   bool DIAG_L = true;
   bool DIAG_B = true;
 
+
   // All pinMode in one function
+  // DONT WORK IN CPP FILE, ONLY IN INO FILE
   void start(){
     // Left motor
     pinMode(PWM1,OUTPUT);
@@ -79,12 +81,21 @@ class MMS
     pinMode(9, OUTPUT);
     digitalWrite(8, HIGH);
     digitalWrite(9, LOW);
-    }
-  
-
+  }
  
+  // Stop motors when linear and angular velocities = 0.0
+  // DONT WORK IN CPP FILE, ONLY IN INO FILE
+  void motor_stop(){
+    analogWrite(PWM1, 0);  
+    analogWrite(PWM2, 0);
+    digitalWrite(DIR1A,LOW); digitalWrite(DIR2A,LOW);
+    digitalWrite(DIR1B,LOW); digitalWrite(DIR2B,LOW);
+    digitalWrite(DIR1A,HIGH); digitalWrite(DIR2A,HIGH);
+    digitalWrite(DIR1B,HIGH); digitalWrite(DIR2B,HIGH);
+  }
 
   // Make wheels free for spinning by hands, zero speed
+  // DONT WORK IN CPP FILE, ONLY IN INO FILE
   void torque_disable(){
     analogWrite(PWM1, 0);  
     analogWrite(PWM2, 0);
@@ -92,80 +103,40 @@ class MMS
     digitalWrite(DIR1B,LOW); digitalWrite(DIR2B,LOW);
   }
   
-  // Emergency STOP of motors by torque disable and zero spd
-  // void brake_motors(){;}
-  
   void clear(){
   // EMPTY
   }
 
-  // Set speed of motors by linear and angular velocity
-  /*void set_vel(float linear, float angular){
-    SPD_L = 0;
-    SPD_R = 0;
-    
-    
+  void set_pwm(float SPD_L, float SPD_R){
+    // Potential protection
+    if((SPD_L == 0.0)&&(SPD_R == 0.0)){
+      // DONT WORK IN CPP FILE, ONLY IN INO FILE
+      //motor_stop();
+      //torque_disable();
+    }
 
-
-    // Calculate velocity to speed of each wheel
-    SPD_L = round(linear - angular * BASE_WIDTH / 2.0);
-    SPD_R = round(linear + angular * BASE_WIDTH / 2.0);
-
-    // Set the spinning direction of each wheel
-    if(linear - angular * BASE_WIDTH / 2.0 > 0.0) {
+    // Set direction of spinning for each wheels
+    if(SPD_L > 0.0) {
       digitalWrite(DIR1A,HIGH); digitalWrite(DIR2A,LOW);
     }
-    if(linear - angular * BASE_WIDTH / 2.0 < 0.0) {
-     digitalWrite(DIR1A,LOW); digitalWrite(DIR2A,HIGH);
+    if(SPD_L < 0.0) {
+      digitalWrite(DIR1A,LOW); digitalWrite(DIR2A,HIGH);
     }
-    if(linear + angular * BASE_WIDTH / 2.0 > 0.0) {
-     digitalWrite(DIR1B,HIGH); digitalWrite(DIR2B,LOW);
+    if(SPD_R > 0.0) {
+    digitalWrite(DIR1B,HIGH); digitalWrite(DIR2B,LOW);
     }
-    if(linear + angular * BASE_WIDTH / 2.0 < 0.0) {
+    if(SPD_R < 0.0) {
       digitalWrite(DIR1B,LOW); digitalWrite(DIR2B,HIGH);
     }
 
+    // Set PWM speed to each wheels
     analogWrite(PWM1, abs(SPD_L));  
     analogWrite(PWM2, abs(SPD_R));
-    }*/
-
-    void set_pwm(float SPD_L, float SPD_R){
-      if(SPD_L > 0.0) {
-        digitalWrite(DIR1A,HIGH); digitalWrite(DIR2A,LOW);
-      }
-      if(SPD_L < 0.0) {
-        digitalWrite(DIR1A,LOW); digitalWrite(DIR2A,HIGH);
-      }
-      if(SPD_R > 0.0) {
-      digitalWrite(DIR1B,HIGH); digitalWrite(DIR2B,LOW);
-      }
-      if(SPD_R < 0.0) {
-        digitalWrite(DIR1B,LOW); digitalWrite(DIR2B,HIGH);
-      }
-
-    analogWrite(PWM1, abs(SPD_L));  
-    analogWrite(PWM2, abs(SPD_R));
-
-
-
-
-    }
-
-
-
-    // 
+  }
 
   private:
   int16_t SPD_L = 0;
   int16_t SPD_R = 0;
-  
-  
-
-  
-
-  
-
-  
 };
 
   
