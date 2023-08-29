@@ -76,7 +76,8 @@ void setup(){
 void loop() {
         
     calculate_vel(lin, ang, 0.05);
-    
+
+    // Sending lin and ang velocity to Nuc
     Serial.print("pres_lin");
     Serial.print(",");
     Serial.println(pres_lin);
