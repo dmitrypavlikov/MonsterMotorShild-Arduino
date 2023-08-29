@@ -30,6 +30,10 @@ float PAST_VEL_R = 0;
 float lin = 0.0; // m/s
 float ang = 0.0; // m/s  (+ CWW | - CW)
 
+// Present linear vel and angular vel by encoders
+float pres_lin = 0.0;   // m/s
+float pres_ang = 0.0;   // m/s  (+ CWW | - CW)
+
 // Left motor PID variables
 float PID_L = 0;        // Error
 float I_PID_L = 0;      // Integral Error
@@ -72,6 +76,13 @@ void setup(){
 void loop() {
         
     calculate_vel(lin, ang, 0.05);
+    
+    Serial.print("pres_lin");
+    Serial.print(",");
+    Serial.println(pres_lin);
+    Serial.print("pres_ang");
+    Serial.print(",");
+    Serial.println(pres_ang);
     
   // Check velocity timeout
   if(millis() - timer >= CMD_VEL_TIMEOUT){
@@ -134,11 +145,27 @@ void calculate_vel(float lin, float ang, float freq){
   // Send PWM to Moster Motor Shield
   mms.set_pwm(PID_L, PID_R);
 
+  //#####################################################//
+  // Calculate present vel and ang
+  pres_lin = (PRESENT_VEL_L + PRESENT_VEL_R) / 2;
+  pres_ang = (PRESENT_VEL_R - PRESENT_VEL_L) / BASE_WIDTH;
+  // TODO Calculate present position
+
   // Update previous data
   PAST_VEL_L = PRESENT_VEL_L;
   PAST_VEL_R = PRESENT_VEL_R;
   PAST_EN_L = PRESENT_EN_L;
   PAST_EN_R = PRESENT_EN_R;
+}
+
+void sendSerial_float(float* data, int data_length, String name_){
+  Serial.print(name_+",");
+  for(int i = 0;i < data_length;i++){
+    Serial.print(data[i]);
+    if(i != (data_length-1))
+      Serial.print(",");
+  }
+  Serial.println();
 }
 
 /**********SERIAL FUNCTIONS SPACE***********/
