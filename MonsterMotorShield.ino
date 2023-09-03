@@ -78,12 +78,11 @@ void loop() {
     calculate_vel(lin, ang, 0.05);
 
     // Sending lin and ang velocity to Nuc
-    Serial.print("pres_lin");
-    Serial.print(",");
+    Serial.print("pres_vel,");
     Serial.println(pres_lin);
-    Serial.print("pres_ang");
     Serial.print(",");
-    Serial.println(pres_ang);
+    Serial.print(pres_ang);
+    Serial.println(",");
     
   // Check velocity timeout
   if(millis() - timer >= CMD_VEL_TIMEOUT){
