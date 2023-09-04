@@ -79,7 +79,7 @@ void loop() {
 
     // Sending lin and ang velocity to Nuc
     Serial.print("pres_vel,");
-    Serial.println(pres_lin);
+    Serial.print(pres_lin);
     Serial.print(",");
     Serial.print(pres_ang);
     Serial.println(",");
