@@ -28,7 +28,7 @@ void IrisMotor::init(char _LorR, int _CWPin, int _CCWPin, int _PWMPin, int _ENC1
     Timer = millis(); 
 
     pinMode(CWPin, OUTPUT);
-    pinMode(CWWPin, OUTPUT);
+    pinMode(CCWPin, OUTPUT);
     pinMode(PWMPin, OUTPUT);
     pinMode(ENC1Pin, INPUT_PULLUP);
     pinMode(ENC2Pin, INPUT_PULLUP);
@@ -52,7 +52,7 @@ void IrisMotor::calcVelocity() {
             FlagSavePosition = true;
         } else {
             if(FlagSavePosition) {
-                GoalEncoderPos = PresEncoderPose;
+                GoalEncoderPose = PresEncoderPose;
                 FlagSavePosition = false;
             }
 
@@ -65,11 +65,12 @@ void IrisMotor::calcVelocity() {
 }
 
 void IrisMotor::velocityPID() {
+    double err = 0.0;
     if((LorR == 'L')||(LorR == 'l')) {
-        double err = GoalLinVel - GoalAngVel*BASE_WIDTH - PresEncoderVel;
+        err = GoalLinVel - GoalAngVel*BASE_WIDTH - PresEncoderVel;
     }
     if((LorR == 'R')||(LorR == 'r')) {
-        double err = GoalLinVel + GoalAngVel*BASE_WIDTH - PresEncoderVel;
+        err = GoalLinVel + GoalAngVel*BASE_WIDTH - PresEncoderVel;
     }
     IntegralVel += err*((double)ENCODER_FREQ/1000);
     double D = (PresEncoderVel - PastEncoderVel);
@@ -78,7 +79,7 @@ void IrisMotor::velocityPID() {
 }
 
 void IrisMotor::positionPID() {
-    double err = GoalEncoderPos - PresEncoderPose;
+    double err = GoalEncoderPose - PresEncoderPose;
     IntegralPos += err*((double)ENCODER_FREQ/1000);
     double D = (PresEncoderPose - PastEncoderPose);
     PastEncoderPose = PresEncoderPose;
@@ -91,14 +92,15 @@ void IrisMotor::positionPID() {
 void IrisMotor::controlDriver() {
     if(PWM > 0.00) {
         digitalWrite(CWPin, HIGH);
-        digitalWrite(CWWPin, LOW);
-        analogWrite(PWMPin, abs(PWM))
+        digitalWrite(CCWPin, LOW);
+        analogWrite(PWMPin, abs(PWM));
     }
     if(PWM < 0.00) {
         digitalWrite(CWPin, LOW);
         digitalWrite(CCWPin, HIGH);
-        analogWrite(PWMPin, abs(PWM))
+        analogWrite(PWMPin, abs(PWM));
     }
+}
 
 void IrisMotor::interruptListener() {
     FlagInterrupt = true;
@@ -123,9 +125,6 @@ void IrisMotor::setGoalVelocity(double lin, double ang){
     GoalAngVel = ang;
 }
 
-double getPresentVel(){
+double IrisMotor::getPresentVel(){
     return PresEncoderVel;
-}
-
-
 }
