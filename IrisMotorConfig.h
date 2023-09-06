@@ -8,6 +8,8 @@
     /*Physical parameters*/
     #define WHEEL_DIAMETER 0.2
     #define BASE_WIDTH 0.315
+    #define MAX_PWM 250
+    #define MIN_PWM -250
 
     /*PositionPID koefficients*/
     #define P_KP 0
