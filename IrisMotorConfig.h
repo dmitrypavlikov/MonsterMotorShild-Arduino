@@ -1,7 +1,7 @@
 #ifndef IRIS_MOTOR_CONFIG_H
 #define IRIS_MOTOR_CONFIG_H
 
-    #define ENCODER_FREQ 50     // 20 Hz
+    #define ENCODER_FREQ 0.05     // 20 Hz
     #define TIX_PER_SPIN_L 496  
     #define TIX_PER_SPIN_R 696
 
