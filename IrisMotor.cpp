@@ -45,11 +45,11 @@ void IrisMotor::calcVelocity() {
             PresEncoderVel = PresEncoderVel/TIX_PER_SPIN_R;
         }
         PastEncoderPose = PresEncoderPose;
-        //if(PresEncoderVel != 0.0) {
+        if(GoalLinVel != 0.0) {
             velocityPID();
             controlDriver();
             FlagSavePosition = true;
-        /*} else {
+        } else {
             if(FlagSavePosition) {
                 GoalEncoderPose = PresEncoderPose;
                 FlagSavePosition = false;
@@ -58,8 +58,8 @@ void IrisMotor::calcVelocity() {
             IntegralPos = 0;
             IntegralVel = 0;
             positionPID();
-            //controlDriver();
-        }*/
+            controlDriver();
+        }
     }
 }
 
@@ -78,11 +78,12 @@ void IrisMotor::velocityPID() {
 }
 
 void IrisMotor::positionPID() {
-    double err = GoalEncoderPose - PresEncoderPose;
+    double err = 0.0;
+    err = GoalEncoderPose - PresEncoderPose;
     IntegralPos += err*((double)ENCODER_FREQ);
     double D = (PresEncoderPose - PastEncoderPose);
     PastEncoderPose = PresEncoderPose;
-    PWM = constrain(round(err*V_KP + IntegralPos*V_KI + D*V_KD), MIN_PWM, MAX_PWM);
+    PWM = constrain(round(err*P_KP + IntegralPos*P_KI + D*P_KD), MIN_PWM, MAX_PWM);
 }
 
 

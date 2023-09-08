@@ -12,8 +12,8 @@
     #define MIN_PWM -250
 
     /*PositionPID koefficients*/
-    #define P_KP 0
-    #define P_KI 0
+    #define P_KP 3
+    #define P_KI 0.1
     #define P_KD 0
 
     /*VelocityPID koefficients*/

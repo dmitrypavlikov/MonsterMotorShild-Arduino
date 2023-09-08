@@ -52,8 +52,8 @@ void loop() {
 
   if(millis() - timer > 50){
     timer = millis();
-    LeftMotor.setGoalVelocity(0.2, 0.0);
-    RightMotor.setGoalVelocity(0.2, 0.0);
+    LeftMotor.setGoalVelocity(0.0, 0.0);
+    RightMotor.setGoalVelocity(0.0, 0.0);
     Serial.print(LeftMotor.getPresentVel());
     Serial.print(" ");
     Serial.println(RightMotor.getPresentVel());
