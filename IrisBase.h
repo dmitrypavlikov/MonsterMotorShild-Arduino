@@ -14,10 +14,11 @@ class IrisBase {
 		double RealVelocityY;
 		double RealVelocityW;
 
+        double EncoderPoseX;
+        double EncoderPoseY;
+        double EncoderPoseW;
+
         unsigned long Timer;
-        bool FlagNewGoalVelocity;
-
-
 
     public:
         IrisMotor LeftMotor;
@@ -30,11 +31,15 @@ class IrisBase {
 
         void tick();
         
-        // TODO getters!
-        void setGoalVelocity(double _GoalVelocityX, double _GoalVelocityY, double _GoalVelocityW);
-        
-}
+        void setGoalVelocity(double _GoalVelocityX, double _GoalVelocityW);
+        // Getters
+        double getPresentVelL();
+        double getPresentVelR();
+        double getPresentLinVel();
+        double getPresentAngVel();
 
+};
 
+extern IrisBase Base; 
 
 #endif

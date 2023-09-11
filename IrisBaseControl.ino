@@ -1,5 +1,4 @@
-//#include "IrisBase.h"
-#include "IrisMotor.h"
+#include "IrisBase.h"
 
 #include <PinChangeInterrupt.h>
 #include <PinChangeInterruptBoards.h>
@@ -10,17 +9,18 @@
 #define SERIAL_BAUD 115200
 #define SERIAL_RATE 10 
 
-unsigned long timer;
+float GoalLinVel;
+float GoalAngVel;;
 
-IrisMotor LeftMotor;
-IrisMotor RightMotor;
+unsigned long timer;
+unsigned long serial_timer;
 
 void interruptListenerL() {
-  LeftMotor.interruptListener();
+  Base.LeftMotor.interruptListener();
 }
 
 void interruptListenerR() {
-  RightMotor.interruptListener();
+  Base.RightMotor.interruptListener();
 }
 
 void setup() {
@@ -28,9 +28,8 @@ void setup() {
   Serial.begin(SERIAL_BAUD);
   Serial.setTimeout(SERIAL_RATE);
 
-  LeftMotor.init('L',2,3,4,10,11);
-  RightMotor.init('R',5,6,7,13,12);
-
+  Base.init('L',2,3,4,10,11,
+            'R',5,6,7,13,12);
 
   attachPCINT(digitalPinToPCINT(10), interruptListenerL, RISING);
   attachPCINT(digitalPinToPCINT(13), interruptListenerR, RISING);
@@ -42,23 +41,40 @@ void setup() {
   digitalWrite(8, HIGH);
   digitalWrite(9, LOW);
 
-  Serial.begin(115200);
+  serial_timer = millis();
+  timer = millis();
 }
 
 void loop() {
+  Base.tick();
+  Base.setGoalVelocity(GoalLinVel, GoalAngVel);
   
-  LeftMotor.tick();
-  RightMotor.tick();
-
   if(millis() - timer > 50){
     timer = millis();
-    LeftMotor.setGoalVelocity(0.0, 0.0);
-    RightMotor.setGoalVelocity(0.0, 0.0);
-    Serial.print(LeftMotor.getPresentVel());
-    Serial.print(" ");
-    Serial.println(RightMotor.getPresentVel());
     
   }
-  
 
+  if(millis() - serial_timer > CMD_VEL_TIMEOUT){
+    GoalLinVel = 0.0;
+    GoalAngVel = 0.0;  
+  }
+  
+}
+
+void serialEvent() {
+  char mail[12]={}; // [+x.xx,+x.xx/n] 12 chars
+  String num;
+  bool split = true;
+  Serial.readBytesUntil('\n', mail, 12);
+
+  for(int i=0; i<sizeof(mail); i++) {
+    if(mail[i] != ',') {
+      num += mail[i];
+    } else {
+      GoalLinVel = num.toFloat(); // Read linear velocity
+      num = "";
+      }
+  }
+    GoalAngVel = num.toFloat(); // Read angular velocity
+    serial_timer = millis();
 }

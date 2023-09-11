@@ -31,6 +31,7 @@ class IrisMotor {
         void controlDriver();   // 
         void velocityPID();     // PID for moving
         void positionPID();     // PID for standing
+        void relaxMotor();      // Make motor no power
 
 
     public:

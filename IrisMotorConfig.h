@@ -17,8 +17,8 @@
     #define P_KD 0
 
     /*VelocityPID koefficients*/
-    #define V_KP 350
-    #define V_KI 60
+    #define V_KP 130
+    #define V_KI 150
     #define V_KD 0
 
 

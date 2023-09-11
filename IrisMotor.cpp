@@ -50,7 +50,9 @@ void IrisMotor::calcVelocity() {
             controlDriver();
             FlagSavePosition = true;
         } else {
-            if(FlagSavePosition) {
+            // Great option if floor inclined
+            // Not used in IrisBase now
+            /* if(FlagSavePosition) {
                 GoalEncoderPose = PresEncoderPose;
                 FlagSavePosition = false;
             }
@@ -58,8 +60,14 @@ void IrisMotor::calcVelocity() {
             IntegralPos = 0;
             IntegralVel = 0;
             positionPID();
-            controlDriver();
-        }
+            controlDriver();}*/
+
+            relaxMotor();
+            IntegralPos = 0;
+            IntegralVel = 0;
+       }
+       
+          
     }
 }
 
@@ -104,6 +112,14 @@ void IrisMotor::controlDriver() {
 
 void IrisMotor::interruptListener() {
     FlagInterrupt = true;
+}
+
+void IrisMotor::relaxMotor(){
+  digitalWrite(CWPin, LOW);
+  digitalWrite(CCWPin, LOW);
+  PWM = 0;
+  analogWrite(PWMPin, abs(PWM));
+  
 }
 
 void IrisMotor::tick() {
