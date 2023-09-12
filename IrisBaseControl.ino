@@ -49,7 +49,14 @@ void loop() {
   Base.tick();
   Base.setGoalVelocity(GoalLinVel, GoalAngVel);
   
-  if(millis() - timer > 50){
+  if(millis() - timer > SERIAL_FREQ){
+    Serial.print("pos,");
+    Serial.print(Base.getBasePosX());
+    Serial.print(",");
+    Serial.print(Base.getBasePosY());
+    Serial.print(",");
+    Serial.println(Base.getBasePosW());
+
     timer = millis();
     
   }
