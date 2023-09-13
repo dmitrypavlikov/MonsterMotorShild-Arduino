@@ -23,8 +23,8 @@ class IrisBase {
       void calculateBasePos();
 
     public:
-      IrisMotor LeftMotor;
-      IrisMotor RightMotor;
+      IrisMotor leftMotor;
+      IrisMotor rightMotor;
 
       void init(char L_LorR, int L_CWPin, int L_CCWPin, 
                   int L_PWMPin, int L_ENC1Pin, int L_ENC2Pin,
@@ -47,6 +47,6 @@ class IrisBase {
 
 };
 
-extern IrisBase Base; 
+extern IrisBase base; 
 
 #endif

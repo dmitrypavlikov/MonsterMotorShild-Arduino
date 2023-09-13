@@ -16,11 +16,11 @@ unsigned long timer;
 unsigned long serial_timer;
 
 void interruptListenerL() {
-  Base.LeftMotor.interruptListener();
+  base.leftMotor.interruptListener();
 }
 
 void interruptListenerR() {
-  Base.RightMotor.interruptListener();
+  base.rightMotor.interruptListener();
 }
 
 void setup() {
@@ -28,7 +28,7 @@ void setup() {
   Serial.begin(SERIAL_BAUD);
   Serial.setTimeout(SERIAL_RATE);
 
-  Base.init('L',2,3,4,10,11,
+  base.init('L',2,3,4,10,11,
             'R',5,6,7,13,12);
 
   attachPCINT(digitalPinToPCINT(10), interruptListenerL, RISING);
@@ -46,16 +46,16 @@ void setup() {
 }
 
 void loop() {
-  Base.tick();
-  Base.setGoalVelocity(GoalLinVel, GoalAngVel);
+  base.tick();
+  base.setGoalVelocity(GoalLinVel, GoalAngVel);
   
   if(millis() - timer > SERIAL_FREQ){
     Serial.print("pos,");
-    Serial.print(Base.getBasePosX());
+    Serial.print(base.getBasePosX());
     Serial.print(",");
-    Serial.print(Base.getBasePosY());
+    Serial.print(base.getBasePosY());
     Serial.print(",");
-    Serial.println(Base.getBasePosW());
+    Serial.println(base.getBasePosW());
 
     timer = millis();
     
