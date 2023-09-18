@@ -55,7 +55,12 @@ void loop() {
     Serial.print(",");
     Serial.print(base.getBasePosY());
     Serial.print(",");
-    Serial.println(base.getBasePosW());
+    Serial.print(base.getBasePosTh());
+    Serial.print(",");
+    Serial.print(base.getPresentLinVel());
+    Serial.print(",");
+    Serial.println(base.getPresentAngVel());
+    
 
     timer = millis();
     
