@@ -8,15 +8,14 @@ class IrisBase {
     private:
       double GoalVelocityX;
       double GoalVelocityY;
-		  double GoalVelocityW;
+		  double GoalVelocityTh;
 
 		  double RealVelocityX;
-		  double RealVelocityY;
-		  double RealVelocityW;
+		  double RealVelocityTh;
 
       double BasePosX;
       double BasePosY;
-      double BasePosW;
+      double BasePosTh;
 
       unsigned long Timer;
 
@@ -34,7 +33,7 @@ class IrisBase {
       void tick();
 
       
-      void setGoalVelocity(double _GoalVelocityX, double _GoalVelocityW);
+      void setGoalVelocity(double _GoalVelocityX, double _GoalVelocityTh);
 
       double getPresentVelL();
       double getPresentVelR();
@@ -42,7 +41,7 @@ class IrisBase {
       double getPresentAngVel();
       double getBasePosX();
       double getBasePosY();
-      double getBasePosW();
+      double getBasePosTh();
 
 
 };

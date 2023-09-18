@@ -13,16 +13,14 @@ void IrisBase::init(char L_LorR, int L_CWPin, int L_CCWPin,
                     R_PWMPin, R_ENC1Pin, R_ENC2Pin);
 
     GoalVelocityX = 0.0;
-    GoalVelocityY = 0.0;
-    GoalVelocityW = 0.0;
+    GoalVelocityTh = 0.0;
 
     RealVelocityX = 0.0;
-    RealVelocityY = 0.0;
-    RealVelocityW = 0.0;
+    RealVelocityTh = 0.0;
     
     BasePosX = 0.0;
     BasePosY = 0.0;
-    BasePosW = 0.0;
+    BasePosTh = 0.0;
 
     Timer = millis();
 }
@@ -41,17 +39,17 @@ void IrisBase::calculateBasePos() {
     double dx = 0;
     double dy = 0;
 
-    dx = this->getPresentLinVel() * cos(BasePosW + this->getPresentAngVel()/2);
-    dy = this->getPresentLinVel() * sin(BasePosW + this->getPresentAngVel()/2);
+    dx = this->getPresentLinVel() * cos(BasePosTh + this->getPresentAngVel()/2);
+    dy = this->getPresentLinVel() * sin(BasePosTh + this->getPresentAngVel()/2);
 
     BasePosX += dx;
     BasePosY += dy;
-    BasePosW += this->getPresentAngVel();
+    BasePosTh += this->getPresentAngVel();
 }
 
-void IrisBase::setGoalVelocity(double _GoalVelocityX, double _GoalVelocityW) {
-    leftMotor.setGoalVelocity(_GoalVelocityX, _GoalVelocityW);
-    rightMotor.setGoalVelocity(_GoalVelocityX, _GoalVelocityW);
+void IrisBase::setGoalVelocity(double _GoalVelocityX, double _GoalVelocityTh) {
+    leftMotor.setGoalVelocity(_GoalVelocityX, _GoalVelocityTh);
+    rightMotor.setGoalVelocity(_GoalVelocityX, _GoalVelocityTh);
 }
 
 double IrisBase::getPresentLinVel() {
@@ -78,6 +76,6 @@ double IrisBase::getBasePosY() {
     return this->BasePosY;
 }
 
-double IrisBase::getBasePosW() {
-    return this->BasePosW;
+double IrisBase::getBasePosTh() {
+    return this->BasePosTh;
 }
