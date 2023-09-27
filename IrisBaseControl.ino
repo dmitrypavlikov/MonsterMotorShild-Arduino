@@ -5,12 +5,8 @@
 #include <PinChangeInterruptPins.h>
 #include <PinChangeInterruptSettings.h>
 
-#define CMD_VEL_TIMEOUT 3000
-#define SERIAL_BAUD 115200
-#define SERIAL_RATE 10 
-
-float GoalLinVel;
-float GoalAngVel;;
+float GoalVelocityX;
+float GoalVelocityTh;;
 
 unsigned long timer;
 unsigned long serial_timer;
@@ -26,14 +22,13 @@ void interruptListenerR() {
 void setup() {
   delay(1000);
   Serial.begin(SERIAL_BAUD);
-  Serial.setTimeout(SERIAL_RATE);
+  Serial.setTimeout(CYCLE_FREQ*1000);
 
-  base.init('L',2,3,4,10,11,
-            'R',5,6,7,13,12);
+  base.init(TICKS_PER_SPIN_L,2,3,4,10,11,
+            TICKS_PER_SPIN_R,5,6,7,13,12);
 
   attachPCINT(digitalPinToPCINT(10), interruptListenerL, RISING);
   attachPCINT(digitalPinToPCINT(13), interruptListenerR, RISING);
-
 
   //GPIO Pins for power supply of right encoder
   pinMode(8, OUTPUT);
@@ -47,9 +42,9 @@ void setup() {
 
 void loop() {
   base.tick();
-  base.setGoalVelocity(GoalLinVel, GoalAngVel);
+  base.setGoalVelocity(GoalVelocityX, GoalVelocityTh);
   
-  if(millis() - timer > SERIAL_FREQ){
+  if(millis() - timer > CYCLE_FREQ*1000){
     Serial.print("pos,");
     Serial.print(base.getBasePosX());
     Serial.print(",");
@@ -57,20 +52,17 @@ void loop() {
     Serial.print(",");
     Serial.print(base.getBasePosTh());
     Serial.print(",");
-    Serial.print(base.getPresentLinVel());
+    Serial.print(base.getPresentVelX());
     Serial.print(",");
-    Serial.println(base.getPresentAngVel());
+    Serial.println(base.getPresentVelTh());
     
-
     timer = millis();
-    
   }
 
   if(millis() - serial_timer > CMD_VEL_TIMEOUT){
-    GoalLinVel = 0.0;
-    GoalAngVel = 0.0;  
+    GoalVelocityX = 0.0;
+    GoalVelocityTh = 0.0;  
   }
-  
 }
 
 void serialEvent() {
@@ -83,10 +75,10 @@ void serialEvent() {
     if(mail[i] != ',') {
       num += mail[i];
     } else {
-      GoalLinVel = num.toFloat(); // Read linear velocity
+      GoalVelocityX = num.toFloat(); // Read linear velocity
       num = "";
       }
   }
-    GoalAngVel = num.toFloat(); // Read angular velocity
+    GoalVelocityTh = num.toFloat(); // Read angular velocity
     serial_timer = millis();
 }

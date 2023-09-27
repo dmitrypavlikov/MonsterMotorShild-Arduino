@@ -6,9 +6,7 @@
 
 class IrisMotor {
     private:
-        // 'L' or 'l' if left motor, 'R' or 'r' if right motor
-        // It's important for TIX_PER_SPIN of encoders
-        char LorR;
+        int TicksPerSpin;
         int CWPin, CCWPin, PWMPin, ENC1Pin, ENC2Pin;
         int PWM;
         int PresEncoderPose;    //
@@ -16,37 +14,33 @@ class IrisMotor {
         int GoalEncoderPose;    //
         double PresEncoderVel;  //
         double PastEncoderVel;  //
+        double GoalEncoderVel;
+        
         double IntegralVel;     // VelocityPID
         double IntegralPos;     // PosityonPID
 
-        double GoalLinVel;      // Задают извне
-        double GoalAngVel;      // Задают извне
-        
         bool FlagInterrupt;     // InterruptListener()
         bool FlagSavePosition;  // CalcVelocity()
 
         unsigned long Timer;    // millis()
 
         void calcVelocity();    // Main calculation
-        void controlDriver();   // 
-        void velocityPID();     // PID for moving
-        void positionPID();     // PID for standing
+        void controlDriver();
+        void velocityPID();     // PID for control velocity of wheel
+        void positionPID();     // PID for save position
         void relaxMotor();      // Make motor no power
 
 
     public:
-        void init(char LorR, int CWPin, int CCWPin, int PWMPin, int ENC1Pin, int ENC2Pin);
+        void init(int TicksPerSpin, int CWPin, int CCWPin, int PWMPin, int ENC1Pin, int ENC2Pin);
         void interruptListener();
         void tick();
-
-        // TODO getters!
+        
+        /* Getters */
         double getPresentVel();
 
-        // TODO setters!
-        void setGoalVelocity(double lin, double ang);
-
-
-
+        /* Setters */
+        void setGoalVelocity(double GoalVelocity);
 
 };
 

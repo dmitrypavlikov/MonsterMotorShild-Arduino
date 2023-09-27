@@ -2,21 +2,15 @@
 
 IrisBase base = IrisBase();
 
-void IrisBase::init(char L_LorR, int L_CWPin, int L_CCWPin, 
+void IrisBase::init(int L_TPS, int L_CWPin, int L_CCWPin, 
                     int L_PWMPin, int L_ENC1Pin, int L_ENC2Pin,
-                    char R_LorR, int R_CWPin, int R_CCWPin,
+                    int R_TPS, int R_CWPin, int R_CCWPin,
                     int R_PWMPin, int R_ENC1Pin, int R_ENC2Pin) {
 
-    leftMotor.init(L_LorR, L_CWPin, L_CCWPin, 
+    leftMotor.init(L_TPS, L_CWPin, L_CCWPin, 
                     L_PWMPin, L_ENC1Pin, L_ENC2Pin);
-    rightMotor.init(R_LorR, R_CWPin, R_CCWPin,
+    rightMotor.init(R_TPS, R_CWPin, R_CCWPin,
                     R_PWMPin, R_ENC1Pin, R_ENC2Pin);
-
-    GoalVelocityX = 0.0;
-    GoalVelocityTh = 0.0;
-
-    RealVelocityX = 0.0;
-    RealVelocityTh = 0.0;
     
     BasePosX = 0.0;
     BasePosY = 0.0;
@@ -29,7 +23,7 @@ void IrisBase::tick() {
     leftMotor.tick();
     rightMotor.tick();
 
-    if(millis() - Timer > 50) {
+    if(millis() - Timer > CYCLE_FREQ*1000) {
         this->calculateBasePos();
         Timer = millis();
     }
@@ -39,24 +33,33 @@ void IrisBase::calculateBasePos() {
     double dx = 0;
     double dy = 0;
 
-    dx = this->getPresentLinVel() * cos(BasePosTh + this->getPresentAngVel()/2);
-    dy = this->getPresentLinVel() * sin(BasePosTh + this->getPresentAngVel()/2);
+    double dS = this->getPresentVelX() * CYCLE_FREQ;
+    double dTh = this->getPresentVelTh() * CYCLE_FREQ;
+
+    dx = dS * cos(BasePosTh + dTh/2);
+    dy = dS * sin(BasePosTh + dTh/2);
 
     BasePosX += dx;
     BasePosY += dy;
-    BasePosTh += this->getPresentAngVel();
+    BasePosTh += dTh;
 }
 
-void IrisBase::setGoalVelocity(double _GoalVelocityX, double _GoalVelocityTh) {
-    leftMotor.setGoalVelocity(_GoalVelocityX, _GoalVelocityTh);
-    rightMotor.setGoalVelocity(_GoalVelocityX, _GoalVelocityTh);
+double IrisBase::normalizeAngle(double angle){
+    while(angle > pi){
+        angle -= 2.0*pi;
+    }
+    while(angle < -pi){
+        angle += 2.0*pi;
+    }
+    return angle;
 }
 
-double IrisBase::getPresentLinVel() {
+/* Getters */
+double IrisBase::getPresentVelX() {
     return (this->getPresentVelL() + this->getPresentVelR()) / 2;
 }
 
-double IrisBase::getPresentAngVel() {
+double IrisBase::getPresentVelTh() {
     return (this->getPresentVelR() - this->getPresentVelL()) / BASE_WIDTH;
 }
 
@@ -77,5 +80,11 @@ double IrisBase::getBasePosY() {
 }
 
 double IrisBase::getBasePosTh() {
-    return this->BasePosTh;
+    return this->normalizeAngle(this->BasePosTh);
+}
+
+/* Setters */
+void IrisBase::setGoalVelocity(double _GoalVelocityX, double _GoalVelocityTh) {
+    leftMotor.setGoalVelocity(_GoalVelocityX - _GoalVelocityTh*BASE_WIDTH);
+    rightMotor.setGoalVelocity(_GoalVelocityX + _GoalVelocityTh*BASE_WIDTH);
 }

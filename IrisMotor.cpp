@@ -1,26 +1,23 @@
 #include "IrisMotor.h"
 
-void IrisMotor::init(char _LorR, int _CWPin, int _CCWPin, int _PWMPin, int _ENC1Pin, int _ENC2Pin){
-    // 'L' or 'l' if left motor, 'R' or 'r' if right motor
-    // It's important for TIX_PER_SPIN of encoders
-    LorR = _LorR;       
+void IrisMotor::init(int _TPS, int _CWPin, int _CCWPin, int _PWMPin, int _ENC1Pin, int _ENC2Pin){
+    TicksPerSpin = _TPS;     
     CWPin = _CWPin;
     CCWPin = _CCWPin;
     PWMPin = _PWMPin;
     ENC1Pin = _ENC1Pin;
     ENC2Pin = _ENC2Pin;
 
-    PWM = 0;                //
+    PWM = 0;          
     PresEncoderPose = 0;    // For encoder decoding
     PastEncoderPose = 0;    // For encoder decoding
     GoalEncoderPose = 0;    // For PositionSave
     PresEncoderVel = 0.0;   //
     PastEncoderVel = 0.0;   //
-    IntegralVel = 0.0;      //
-    IntegralPos = 0.0;      //
+    GoalEncoderVel = 0.0;
 
-    GoalLinVel = 0.0;       // Задаются извне
-    GoalAngVel = 0.0;       // Задаются извне
+    IntegralVel = 0.0;
+    IntegralPos = 0.0;
 
     FlagInterrupt = false;      // in InterruptListener()
     FlagSavePosition = false;   // in CalcVelocity()
@@ -35,23 +32,18 @@ void IrisMotor::init(char _LorR, int _CWPin, int _CCWPin, int _PWMPin, int _ENC1
 }
 
 void IrisMotor::calcVelocity() {
-    if(millis() - Timer > ENCODER_FREQ*1000){
+    if(millis() - Timer > CYCLE_FREQ*1000){
         Timer = millis();
-        PresEncoderVel = (PresEncoderPose - PastEncoderPose)*WHEEL_DIAMETER*3.14/ENCODER_FREQ;
-        if((LorR == 'L')||(LorR == 'l')) {
-            PresEncoderVel = PresEncoderVel/TIX_PER_SPIN_L;
-        }
-        if((LorR == 'R')||(LorR == 'r')) {
-            PresEncoderVel = PresEncoderVel/TIX_PER_SPIN_R;
-        }
+        PresEncoderVel = ((PresEncoderPose - PastEncoderPose)*WHEEL_DIAMETER*3.14)/(CYCLE_FREQ*TicksPerSpin);
         PastEncoderPose = PresEncoderPose;
-        if(GoalLinVel != 0.0) {
+        if(GoalEncoderVel != 0.0) {
             velocityPID();
             controlDriver();
             FlagSavePosition = true;
         } else {
-            // Great option if floor inclined
-            // Not used in IrisBase now
+            // SavePositionPID - Great option if floor inclined
+            // Not used in Iris now
+            
             /* if(FlagSavePosition) {
                 GoalEncoderPose = PresEncoderPose;
                 FlagSavePosition = false;
@@ -63,23 +55,16 @@ void IrisMotor::calcVelocity() {
             controlDriver();}*/
 
             relaxMotor();
-            IntegralPos = 0;
             IntegralVel = 0;
-       }
-       
-          
+            IntegralPos = 0;
+       }   
     }
 }
 
 void IrisMotor::velocityPID() {
     double err = 0.0;
-    if((LorR == 'L')||(LorR == 'l')) {
-        err = (GoalLinVel - GoalAngVel*BASE_WIDTH - PresEncoderVel);     
-    }
-    if((LorR == 'R')||(LorR == 'r')) {
-        err = GoalLinVel + GoalAngVel*BASE_WIDTH - PresEncoderVel;
-    }
-    IntegralVel += err*((double)ENCODER_FREQ);
+    err = GoalEncoderVel - PresEncoderVel;
+    IntegralVel += err*((double)CYCLE_FREQ);
     double D = (PresEncoderVel - PastEncoderVel);
     PastEncoderVel = PresEncoderVel;
     PWM = constrain(round(err*V_KP + IntegralVel*V_KI + D*V_KD), MIN_PWM, MAX_PWM);
@@ -88,14 +73,11 @@ void IrisMotor::velocityPID() {
 void IrisMotor::positionPID() {
     double err = 0.0;
     err = GoalEncoderPose - PresEncoderPose;
-    IntegralPos += err*((double)ENCODER_FREQ);
+    IntegralPos += err*((double)CYCLE_FREQ);
     double D = (PresEncoderPose - PastEncoderPose);
     PastEncoderPose = PresEncoderPose;
     PWM = constrain(round(err*P_KP + IntegralPos*P_KI + D*P_KD), MIN_PWM, MAX_PWM);
 }
-
-
-    
 
 void IrisMotor::controlDriver() {
     if(PWM > 0.00) {
@@ -134,11 +116,12 @@ void IrisMotor::tick() {
     calcVelocity();
 }
 
-void IrisMotor::setGoalVelocity(double lin, double ang){
-    GoalLinVel = lin;
-    GoalAngVel = ang;
-}
-
+/* Getters */
 double IrisMotor::getPresentVel(){
     return PresEncoderVel;
+}
+
+/* Setters */
+void IrisMotor::setGoalVelocity(double GoalVelocity){
+    GoalEncoderVel = GoalVelocity;
 }
