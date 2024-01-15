@@ -5,7 +5,7 @@
     #define TICKS_PER_SPIN_L 496  
     #define TICKS_PER_SPIN_R 696
     #define BASE_WIDTH 0.315
-    #define MAX_VEL 3.5
+    #define MAX_VEL 0.8
     #define WHEEL_DIAMETER 0.2
 
     /*Serial communication parameters*/
